@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mamdouh Student Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --navy: #14213d;
+  --navy-soft: #1d2d52;
+  --sidebar-text: #c6d0e6;
+  --sidebar-accent: #8fb0ff;
+
+  --ink: #1b2333;
+  --muted: #586277;
+  --paper: #f3f5f9;
+  --surface: #ffffff;
+  --line: #dbe0ea;
+
+  --high: #b42318;
+  --high-bg: #fdecea;
+  --watch: #94600a;
+  --watch-dot: #e8a317;
+  --watch-bg: #fff2d3;
+  --ok: #1a6b45;
+  --ok-dot: #2f9e68;
+  --ok-bg: #e2f3ea;
+  --none: #4d576a;
+  --none-bg: #e9ecf2;
+
+  --focus: #2f49d1;
+  --font: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h1, h2, h3, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.muted { color: var(--muted); }
+
+/* ---------- layout ---------- */
+
+.app {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+main {
+  width: 100%;
+  max-width: 1100px;
+  padding: 2rem 2.5rem 4rem;
+  outline: none;
+}
+
+/* ---------- sidebar ---------- */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem 1rem;
+  background: var(--navy);
+  color: var(--sidebar-text);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 0.5rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.brand-mark { width: 36px; height: 36px; flex: none; }
+
+.brand-text { display: grid; line-height: 1.2; }
+.brand-text strong { font-size: 1.125rem; }
+.brand-text span { font-size: 0.8125rem; color: var(--sidebar-text); }
+
+.nav { display: grid; gap: 0.25rem; }
+
+.nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+}
+
+.nav svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+.nav a:hover { background: var(--navy-soft); color: #fff; }
+
+.nav a[aria-current='page'] {
+  background: var(--navy-soft);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--sidebar-accent);
+}
+
+.sidebar :focus-visible { outline-color: var(--sidebar-accent); }
+
+.sidebar-note {
+  margin-top: auto;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--sidebar-text);
+}
+
+/* ---------- page pieces ---------- */
+
+.page-head { margin-bottom: 1.5rem; }
+.page-head h1 { font-size: 1.75rem; line-height: 1.2; }
+.page-head p { color: var(--muted); margin-top: 0.25rem; }
+
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.section-head h2 { font-size: 1.25rem; }
+.hint { color: var(--muted); font-size: 0.9375rem; margin: 0.15rem 0 1rem; }
+
+.field {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.field select,
+.field input {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  min-width: 10rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.empty {
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+/* ---------- status ---------- */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status.risk-high { color: var(--high); }
+.status.risk-watch { color: var(--watch); }
+.status.risk-ok { color: var(--ok); }
+
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  flex: none;
+  background: var(--none);
+}
+
+.risk-high .dot, .dot.lvl-high { background: var(--high); }
+.risk-watch .dot, .dot.lvl-watch { background: var(--watch-dot); }
+.risk-ok .dot { background: var(--ok-dot); }
+
+/* ---------- summary panel ---------- */
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 1.25rem 0 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.summary > div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.9rem 1.1rem;
+  border-left: 1px solid var(--line);
+}
+
+.summary > div:first-child { border-left: 0; }
+.summary-value { font-size: 1.75rem; font-weight: 700; line-height: 1.1; }
+.summary-label { color: var(--muted); font-size: 0.9375rem; }
+
+/* ---------- student table ---------- */
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.roster {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+}
+
+.roster th,
+.roster td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--line);
+}
+
+.roster thead th {
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: var(--paper);
+}
+
+.roster tbody tr { cursor: pointer; }
+.roster tbody tr:hover { background: #f8f9fc; }
+.roster tbody tr:last-child th,
+.roster tbody tr:last-child td { border-bottom: 0; }
+.roster tbody th { font-weight: 700; }
+
+/* coloured edge on each row = status at a glance */
+.roster tbody tr.risk-high th:first-child { box-shadow: inset 4px 0 0 var(--high); }
+.roster tbody tr.risk-watch th:first-child { box-shadow: inset 4px 0 0 var(--watch-dot); }
+.roster tbody tr.risk-ok th:first-child { box-shadow: inset 4px 0 0 var(--ok-dot); }
+
+.student-link { text-decoration: none; }
+.student-link:hover { text-decoration: underline; }
+
+.score { display: block; font-weight: 700; }
+
+/* ---------- meters ---------- */
+
+.meter {
+  display: block;
+  width: 88px;
+  height: 6px;
+  margin-top: 0.3rem;
+  background: var(--none-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fill { display: block; height: 100%; background: var(--none); border-radius: 3px; }
+.fill.risk-high, .fill.lvl-high { background: var(--high); }
+.fill.risk-watch, .fill.lvl-watch { background: var(--watch-dot); }
+.fill.risk-ok, .fill.lvl-ok { background: var(--ok-dot); }
+.fill.lvl-none { background: var(--sidebar-accent); }
+
+/* ---------- groups ---------- */
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.group-card {
+  align-content: start;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.group-card:hover { border-color: var(--muted); }
+.group-name { font-size: 1.25rem; font-weight: 700; }
+.group-avg { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+.group-avg small { display: block; font-size: 0.875rem; font-weight: 400; color: var(--muted); }
+.group-counts { display: grid; gap: 0.25rem; color: var(--muted); }
+
+/* ---------- student page ---------- */
+
+.student-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.student-head h1 { font-size: 1.75rem; line-height: 1.2; }
+
+.overall {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.overall.risk-high { border-color: var(--high); background: var(--high-bg); }
+.overall.risk-watch { border-color: var(--watch-dot); background: var(--watch-bg); }
+.overall.risk-ok { border-color: var(--ok-dot); background: var(--ok-bg); }
+
+.overall-score { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric {
+  padding: 1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.metric h3 { font-size: 0.9375rem; font-weight: 400; color: var(--muted); }
+.metric-value { font-size: 2rem; font-weight: 700; line-height: 1.2; margin-top: 0.15rem; }
+.metric-sub { font-size: 0.875rem; color: var(--muted); }
+.metric .meter { width: 100%; margin-top: 0.6rem; }
+
+.panel {
+  margin-bottom: 1rem;
+  padding: 1.25rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.panel h2 { font-size: 1.125rem; margin-bottom: 0.75rem; }
+
+.reasons { display: grid; gap: 0.6rem; }
+
+.reasons li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.sub-block + .sub-block { margin-top: 1.25rem; }
+
+.sub-block h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.mini {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.mini th,
+.mini td {
+  padding: 0.4rem 0.75rem 0.4rem 0;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.mini th { color: var(--muted); font-weight: 700; font-size: 0.8125rem; }
+.bad { color: var(--high); font-weight: 700; }
+
+.pill {
+  display: inline-block;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.pill.weak { background: var(--high-bg); color: var(--high); }
+.pill.okay { background: var(--ok-bg); color: var(--ok); }
+.pill.nodata { background: var(--none-bg); color: var(--none); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.chip {
+  padding: 0.1rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.chip.late { background: var(--watch-bg); color: var(--watch); }
+.chip.absent { background: var(--high-bg); color: var(--high); }
+
+/* ---------- sections ---------- */
+
+.page-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.block-title { font-size: 1.25rem; }
+
+.summary + .block-title { margin-top: 0; }
+.section-cards + .block-title { margin-top: 1.75rem; }
+
+.section-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.section-card {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.section-card:hover { border-color: var(--ink); }
+.section-name { font-weight: 700; }
+.section-count { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.section-count small { font-size: 0.875rem; font-weight: 400; color: var(--muted); }
+.section-card .meter { width: 100%; }
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.tab {
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.tab:hover { border-color: var(--ink); }
+.tab[aria-current='page'] { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 700; }
+
+.section-summary { font-size: 1.25rem; margin-bottom: 1rem; }
+.section-summary .muted { font-size: 1rem; }
+
+.roster tbody tr.sec-weak th:first-child { box-shadow: inset 4px 0 0 var(--high); }
+.roster tbody tr.sec-okay th:first-child { box-shadow: inset 4px 0 0 var(--ok-dot); }
+
+.grade-list { display: grid; gap: 0.1rem; font-size: 0.9375rem; }
+.grade-list .bad { color: var(--high); font-weight: 700; }
+
+.pill {
+  display: inline-block;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+}
+
+.pill.wait { background: var(--watch-bg); color: var(--watch); }
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav { display: flex; flex-wrap: wrap; }
+  .sidebar-note { display: none; }
+  main { padding: 1.5rem 1rem 3rem; }
+
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .summary > div { border-left: 0; border-top: 1px solid var(--line); }
+  .summary > div:nth-child(-n + 2) { border-top: 0; }
+  .summary > div:nth-child(even) { border-left: 1px solid var(--line); }
+  .summary > div:last-child { grid-column: 1 / -1; border-left: 0; }
+}
+
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="#/" aria-label="Mamdouh Student Monitor, go to dashboard">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#8fb0ff"/>
+          <path d="M6 22 L12 15 L17 19 L26 8" fill="none" stroke="#14213d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="26" cy="8" r="2.6" fill="#14213d"/>
+        </svg>
+        <span class="brand-text">
+          <strong>Mamdouh</strong>
+          <span>Student Monitor</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Main">
+        <a href="#/" data-nav="dashboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/></svg>
+          Dashboard
+        </a>
+        <a href="#/groups" data-nav="groups">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5z"/><circle cx="17" cy="9" r="2.5"/><path d="M16.6 14c2.7.1 4.4 1.9 4.4 4.500h-4.100c0-1.700-.1-3.200-.3-4.500z"/></svg>
+          Groups
+        </a>
+        <a href="#/sections" data-nav="sections">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h5v14H3zM10 5h5v14h-5zM17 8l4-1 2 11-4 1z"/></svg>
+          Sections
+        </a>
+        <a href="#/students" data-nav="students">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.500 8-6.500s8 2.500 8 6.500z"/></svg>
+          Students
+        </a>
+      </nav>
+
+      <p id="sample-notice" class="sidebar-note" hidden>Showing sample data</p>
+    </aside>
+
+    <main id="view" tabindex="-1"></main>
+  </div>
+
+  <script>
+/*
+ * Mamdouh Student Monitor - settings
+ * Change these numbers to change how students are scored and flagged.
+ */
+window.MONITOR_CONFIG = {
+  // How much each part counts toward the overall score (they should add up to 100).
+  weights: {
+    assignments: 35,
+    exams: 35,
+    liveAttendance: 15,
+    schoolAttendance: 15,
+  },
+
+  // Overall score -> status
+  highRiskBelow: 60, // below this = High risk (red)
+  watchBelow: 70,    // below this = Watch (amber), otherwise On track (green)
+
+  // Grades (assignments and exams), in percent
+  gradeTarget: 70,     // below target = a concern (amber)
+  gradeHighBelow: 55,  // below this = a serious concern (red)
+
+  // Attendance (live and school), in percent
+  attendanceTarget: 75,
+  attendanceHighBelow: 60,
+
+  // A section (Word, Excel...) is "weak" when the student's average in it is below this
+  weakSectionBelowPercent: 75,
+
+  // How many missing assignments count as a serious concern
+  missingAssignmentsHighAt: 3,
+
+  // No activity in the LMS for this many days
+  inactiveAfterDays: 7,      // amber
+  inactiveHighAfterDays: 14, // red
+
+  // Live attendance is "declining" when the last 3 sessions are this many points
+  // worse than the sessions before them
+  decliningAttendanceDrop: 20,
+
+  // true  = a missing assignment counts as 0 in the average
+  // false = a missing assignment is ignored
+  missingSubmissionCountsAsZero: true,
+};
+
+</script>
+  <script>
+/*
+ * Sample data that pretends to come from the LMS.
+ *
+ * The OUTPUT of this file (window.SAMPLE_LMS_DATA) is the data contract the
+ * backend engineer must match:
+ *
+ *   meta         { asOf }                       the "today" used for inactivity checks (ISO date)
+ *   students     { id, name, group, lastActiveDate }
+ *   assignments  { id, studentId, name, section, grade, maxGrade, submission, dueDate }
+ *                  submission: "submitted" | "late" | "missing"   grade: number or null
+ *   exams        { id, studentId, name, score, maxScore, date }   score: number or null (absent)
+ *   attendance   { studentId, date, type, status }
+ *                  type:   "live" | "school"
+ *                  status: "present" | "late" | "absent"
+ *   officeHours  { id, studentId, date, status }
+ *                  status: "upcoming" | "attended" | "missed"
+ *
+ * Dates are ISO strings such as "2026-09-18".
+ * The code below only builds those lists from a compact table so this file stays short.
+ */
+(function () {
+  const AS_OF = '2026-09-21';
+  const MAX = 10;
+
+  const SECTIONS = [
+    { name: 'Word', items: [['Word Homework 1', '2026-09-03'], ['Word Homework 2', '2026-09-10']] },
+    { name: 'Excel', items: [['Excel Homework 1', '2026-09-08'], ['Excel Homework 2', '2026-09-15']] },
+    { name: 'PowerPoint', items: [['PowerPoint Homework 1', '2026-09-12']] },
+    { name: 'Theory Unit 1', items: [['Theory Unit 1 Quiz', '2026-09-05']] },
+    { name: 'Theory Unit 2', items: [['Theory Unit 2 Quiz', '2026-09-17']] },
+  ];
+
+  const EXAMS = [['Exam 1', '2026-09-06'], ['Exam 2', '2026-09-17']];
+
+  const LIVE_DAYS = ['2026-08-25', '2026-08-27', '2026-09-01', '2026-09-03', '2026-09-08', '2026-09-10', '2026-09-15', '2026-09-17'];
+  const SCHOOL_DAYS = ['2026-09-06', '2026-09-07', '2026-09-08', '2026-09-09', '2026-09-10', '2026-09-13', '2026-09-14', '2026-09-15', '2026-09-16', '2026-09-17'];
+
+  // grades: one array per section, in the same order as SECTIONS (Word, Excel, PowerPoint, Theory 1, Theory 2).
+  //   number = graded, null = missing, { grade, late: true } = submitted late
+  // exams:   score out of 100 per exam
+  // live / school: one letter per day. P present, L late, A absent
+  // oh: office hours [date, status]
+  const STUDENTS = [
+    // ---- G1 ----
+    { id: 'S1001', name: 'Ahmed Mohamed', group: 'G1', active: '2026-09-12',
+      grades: [[8, 6], [7, null], [5], [8], [null]], exams: [50, 40],
+      live: 'PPPPAPAA', school: 'PPAPPPPAPP',
+      oh: [['2026-09-10', 'attended'], ['2026-09-15', 'missed'], ['2026-09-25', 'upcoming']] },
+    { id: 'S1002', name: 'Sara Mohamed', group: 'G1', active: '2026-09-20',
+      grades: [[9, 8], [5, 6], [9], [6], [4]], exams: [58, 62],
+      live: 'PPPPPPAP', school: 'PPPPPPPPPP',
+      oh: [['2026-09-15', 'missed'], ['2026-09-25', 'upcoming']] },
+    { id: 'S1003', name: 'Omar Hassan', group: 'G1', active: '2026-09-19',
+      grades: [[6, 7], [8, 9], [8], [9], [8]], exams: [72, 70],
+      live: 'PPAAPAAP', school: 'PPAPPAPPAP',
+      oh: [['2026-09-18', 'attended']] },
+    { id: 'S1014', name: 'Jana Wael', group: 'G1', active: '2026-09-21',
+      grades: [[9, 10], [9, 9], [10], [10], [9]], exams: [88, 92],
+      live: 'PPPPPPPP', school: 'PPPPPPPPPP', oh: [] },
+    { id: 'S1015', name: 'Ziad Osama', group: 'G1', active: '2026-09-19',
+      grades: [[7, 8], [7, 6], [7], [7], [8]], exams: [68, 65],
+      live: 'PPPPPPLP', school: 'PPPPPPPPAP', oh: [] },
+
+    // ---- G2 ----
+    { id: 'S1004', name: 'Mariam Ali', group: 'G2', active: '2026-09-18',
+      grades: [[8, null], [null, null], [null], [8], [9]], exams: [60, 55],
+      live: 'PPPPPPPP', school: 'PPPPPPPPPP',
+      oh: [['2026-09-25', 'upcoming']] },
+    { id: 'S1005', name: 'Youssef Tarek', group: 'G2', active: '2026-09-05',
+      grades: [[7, null], [6, 5], [null], [7], [null]], exams: [45, 40],
+      live: 'PAAPAAAA', school: 'PPAAPAPAAP', oh: [] },
+    { id: 'S1006', name: 'Nour Khaled', group: 'G2', active: '2026-09-21',
+      grades: [[10, 9], [8, 9], [9], [9], [10]], exams: [90, 94],
+      live: 'PPPPPPPP', school: 'PPPPPPPPPP', oh: [] },
+    { id: 'S1007', name: 'Karim Sameh', group: 'G2', active: '2026-09-14',
+      grades: [[5, 4], [7, 6], [6], [8], [8]], exams: [50, 48],
+      live: 'PAPAPAPA', school: 'PPAPAPPPAP',
+      oh: [['2026-09-10', 'missed'], ['2026-09-15', 'missed']] },
+    { id: 'S1008', name: 'Hana Mostafa', group: 'G2', active: '2026-09-20',
+      grades: [[8, 8], [8, 7], [8], [9], [8]], exams: [78, 80],
+      live: 'PPPPPLPP', school: 'PPPPPPPPPP',
+      oh: [['2026-09-15', 'attended']] },
+
+    // ---- G3 ----
+    { id: 'S1009', name: 'Mahmoud Ibrahim', group: 'G3', active: '2026-09-20',
+      grades: [[9, 9], [4, 5], [9], [8], [7]], exams: [65, 60],
+      live: 'PPPPPPPA', school: 'PPPPPPPPPP', oh: [] },
+    { id: 'S1010', name: 'Laila Hassan', group: 'G3', active: '2026-09-21',
+      grades: [[9, 8], [9, 10], [10], [10], [9]], exams: [85, 88],
+      live: 'PPPPPPPP', school: 'PPPPPPPPPP', oh: [] },
+    { id: 'S1011', name: 'Tamer Adel', group: 'G3', active: '2026-09-17',
+      grades: [[6, 6], [6, 7], [5], [5], [8]], exams: [58, 52],
+      live: 'PPAPAPPA', school: 'PPPAPAPPPP',
+      oh: [['2026-09-10', 'attended'], ['2026-09-25', 'upcoming']] },
+    { id: 'S1012', name: 'Salma Nabil', group: 'G3', active: '2026-09-21',
+      grades: [[9, 8], [8, 9], [9], [9], [{ grade: 8, late: true }]], exams: [80, 76],
+      live: 'PPPPPPPP', school: 'PPPPPPPPPP', oh: [] },
+    { id: 'S1013', name: 'Adam Fathy', group: 'G3', active: '2026-09-02',
+      grades: [[9, 9], [8, 9], [9], [9], [8]], exams: [82, 80],
+      live: 'PPPPPPPP', school: 'PPPPPPPPPP', oh: [] },
+  ];
+
+  const STATUS = { P: 'present', L: 'late', A: 'absent' };
+
+  function build() {
+    const data = {
+      meta: { asOf: AS_OF },
+      students: [], assignments: [], exams: [], attendance: [], officeHours: [],
+    };
+
+    STUDENTS.forEach((s) => {
+      data.students.push({ id: s.id, name: s.name, group: s.group, lastActiveDate: s.active });
+
+      SECTIONS.forEach((section, si) => {
+        section.items.forEach(([name, dueDate], ai) => {
+          const raw = s.grades[si][ai];
+          let grade = null;
+          let submission = 'missing';
+          if (typeof raw === 'number') {
+            grade = raw;
+            submission = 'submitted';
+          } else if (raw && typeof raw === 'object') {
+            grade = raw.grade;
+            submission = raw.late ? 'late' : 'submitted';
+          }
+          data.assignments.push({
+            id: `${s.id}-A${si}${ai}`, studentId: s.id, name, section: section.name,
+            grade, maxGrade: MAX, submission, dueDate,
+          });
+        });
+      });
+
+      EXAMS.forEach(([name, date], i) => {
+        data.exams.push({ id: `${s.id}-E${i + 1}`, studentId: s.id, name, score: s.exams[i], maxScore: 100, date });
+      });
+
+      s.live.split('').forEach((letter, i) => {
+        data.attendance.push({ studentId: s.id, date: LIVE_DAYS[i], type: 'live', status: STATUS[letter] });
+      });
+      s.school.split('').forEach((letter, i) => {
+        data.attendance.push({ studentId: s.id, date: SCHOOL_DAYS[i], type: 'school', status: STATUS[letter] });
+      });
+
+      s.oh.forEach(([date, status], i) => {
+        data.officeHours.push({ id: `OH-${s.id}-${i + 1}`, studentId: s.id, date, status });
+      });
+    });
+
+    return data;
+  }
+
+  window.SAMPLE_LMS_DATA = build();
+})();
+
+</script>
+  <script>
+/*
+ * Where the dashboard gets its data.
+ *
+ * TODAY: it uses the sample data from sample-data.js.
+ * LATER: the backend engineer replaces the body of loadLmsData() with a real
+ * request to the LMS. Nothing else needs to change, as long as the response has
+ * the same shape as window.SAMPLE_LMS_DATA (see sample-data.js).
+ */
+window.DATA_SOURCE_IS_SAMPLE = true; // set to false when real data is connected (hides the "Sample data" note)
+
+window.loadLmsData = function loadLmsData() {
+  return Promise.resolve(window.SAMPLE_LMS_DATA);
+
+  // Example of the real version:
+  // return fetch('/api/student-monitor')
+  //   .then((response) => {
+  //     if (!response.ok) throw new Error('LMS request failed');
+  //     return response.json();
+  //   });
+};
+
+</script>
+  <script>
+/*
+ * Mamdouh Student Monitor - logic (no HTML in here).
+ * Turns the raw LMS lists into one summary object per student:
+ * score, risk level, the reasons behind it, and the main issue.
+ */
+(function () {
+  const cfg = window.MONITOR_CONFIG;
+
+  const avg = (list) => (list.length ? list.reduce((s, x) => s + x, 0) / list.length : null);
+  const byDate = (a, b) => a.date.localeCompare(b.date);
+  const round = (n) => Math.round(n);
+  const dayDiff = (fromIso, toIso) =>
+    Math.round((new Date(toIso + 'T00:00:00') - new Date(fromIso + 'T00:00:00')) / 86400000);
+
+  // 'high' (red) | 'watch' (amber) | 'ok' (green) | 'none' (no data)
+  function levelFor(value, target, highBelow) {
+    if (value === null || value === undefined) return 'none';
+    if (value < highBelow) return 'high';
+    if (value < target) return 'watch';
+    return 'ok';
+  }
+
+  // ---------- assignments ----------
+
+  function assignmentScore(a) {
+    if (a.submission === 'missing') return cfg.missingSubmissionCountsAsZero ? 0 : null;
+    if (a.grade === null || a.grade === undefined || !a.maxGrade) return null;
+    return (a.grade / a.maxGrade) * 100;
+  }
+
+  function analyseSection(name, assignments) {
+    const scores = assignments.map(assignmentScore).filter((s) => s !== null);
+    if (!scores.length) return { name, assignments, average: null, status: 'nodata' };
+    const average = avg(scores);
+    return { name, assignments, average, status: average < cfg.weakSectionBelowPercent ? 'weak' : 'okay' };
+  }
+
+  // ---------- attendance ----------
+
+  const attendedShare = (records) =>
+    records.length ? (records.filter((r) => r.status !== 'absent').length / records.length) * 100 : null;
+
+  function attendanceSummary(records) {
+    const sorted = [...records].sort(byDate);
+    const total = sorted.length;
+    const attended = sorted.filter((r) => r.status !== 'absent').length; // late still counts as attending
+
+    let declining = false;
+    let recent = null;
+    if (total >= 6) {
+      const last = sorted.slice(-3);
+      const earlier = sorted.slice(0, -3);
+      recent = { attended: last.filter((r) => r.status !== 'absent').length, total: last.length };
+      declining = attendedShare(earlier) - attendedShare(last) >= cfg.decliningAttendanceDrop;
+    }
+
+    return { records: sorted, total, attended, rate: total ? (attended / total) * 100 : null, declining, recent };
+  }
+
+  // ---------- office hours ----------
+
+  function officeHoursSummary(sessions) {
+    const sorted = [...sessions].sort(byDate);
+    const count = (status) => sorted.filter((s) => s.status === status).length;
+    const past = sorted.filter((s) => s.status !== 'upcoming');
+    const lastPast = past[past.length - 1] || null;
+
+    // none | upcoming | attended | missed  (where the student stands right now)
+    let state = 'none';
+    if (sorted.length) state = count('upcoming') ? 'upcoming' : lastPast.status;
+
+    return {
+      sessions: sorted,
+      total: sorted.length,
+      attended: count('attended'),
+      missed: count('missed'),
+      upcoming: count('upcoming'),
+      lastSessionDate: lastPast ? lastPast.date : null,
+      state,
+    };
+  }
+
+  // ---------- one student ----------
+
+  function analyseStudent(student, data, sectionNames, asOf) {
+    const mine = data.assignments.filter((a) => a.studentId === student.id);
+    const sections = sectionNames.map((name) =>
+      analyseSection(name, mine.filter((a) => a.section === name))
+    );
+    const weakSections = sections.filter((s) => s.status === 'weak').map((s) => s.name);
+    const assignmentAvg = avg(mine.map(assignmentScore).filter((s) => s !== null));
+    const missing = mine.filter((a) => a.submission === 'missing').length;
+
+    const examList = (data.exams || []).filter((e) => e.studentId === student.id);
+    const examAvg = avg(
+      examList.filter((e) => e.score !== null && e.score !== undefined).map((e) => (e.score / e.maxScore) * 100)
+    );
+
+    const records = data.attendance.filter((r) => r.studentId === student.id);
+    const live = attendanceSummary(records.filter((r) => r.type === 'live'));
+    const school = attendanceSummary(records.filter((r) => r.type === 'school'));
+    const officeHours = officeHoursSummary(data.officeHours.filter((o) => o.studentId === student.id));
+    const daysInactive = student.lastActiveDate ? dayDiff(student.lastActiveDate, asOf) : null;
+
+    // Overall score: weighted average of the parts that have data.
+    const parts = [
+      [assignmentAvg, cfg.weights.assignments],
+      [examAvg, cfg.weights.exams],
+      [live.rate, cfg.weights.liveAttendance],
+      [school.rate, cfg.weights.schoolAttendance],
+    ].filter(([value]) => value !== null);
+    const weightSum = parts.reduce((s, [, w]) => s + w, 0);
+    const score = weightSum ? parts.reduce((s, [v, w]) => s + v * w, 0) / weightSum : null;
+
+    const levels = {
+      assignments: levelFor(assignmentAvg, cfg.gradeTarget, cfg.gradeHighBelow),
+      exams: levelFor(examAvg, cfg.gradeTarget, cfg.gradeHighBelow),
+      live: levelFor(live.rate, cfg.attendanceTarget, cfg.attendanceHighBelow),
+      school: levelFor(school.rate, cfg.attendanceTarget, cfg.attendanceHighBelow),
+    };
+
+    // ----- reasons: "Why is this student at risk?" -----
+    // topic is used so the Main Issue column never repeats the same kind of problem twice.
+    const reasons = [];
+    const add = (level, topic, short, text, support = false) => reasons.push({ level, topic, short, text, support });
+
+    if (missing > 0) {
+      add(missing >= cfg.missingAssignmentsHighAt ? 'high' : 'watch', 'assignments', 'Missing assignments',
+        `${missing} assignment${missing === 1 ? '' : 's'} missing`);
+    }
+    if (levels.assignments === 'high' || levels.assignments === 'watch') {
+      add(levels.assignments, 'assignments', 'Low assignment grades',
+        `Assignment average is ${round(assignmentAvg)}%, below the ${cfg.gradeTarget}% target`);
+    }
+    if (levels.exams === 'high' || levels.exams === 'watch') {
+      add(levels.exams, 'exams', 'Low exam scores',
+        `Exam average is ${round(examAvg)}%, below the ${cfg.gradeTarget}% target`);
+    }
+    if (levels.live === 'high' || levels.live === 'watch') {
+      add(levels.live, 'attendance', 'Low live attendance',
+        `Live attendance is ${round(live.rate)}%, below the ${cfg.attendanceTarget}% target`);
+    }
+    if (levels.school === 'high' || levels.school === 'watch') {
+      add(levels.school, 'attendance', 'Low school attendance',
+        `School attendance is ${round(school.rate)}%, below the ${cfg.attendanceTarget}% target`);
+    }
+    if (live.declining) {
+      add('watch', 'attendance', 'Declining attendance',
+        `Live attendance is declining: ${live.recent.attended} of the last ${live.recent.total} sessions attended`);
+    }
+    if (weakSections.length && (levels.assignments === 'ok' || levels.assignments === 'none')) {
+      add('watch', 'sections', `Weak in ${weakSections.join(', ')}`, `Weak in ${weakSections.join(', ')}`);
+    }
+    if (daysInactive !== null && daysInactive >= cfg.inactiveAfterDays) {
+      add(daysInactive >= cfg.inactiveHighAfterDays ? 'high' : 'watch', 'activity', 'No recent activity',
+        `No activity in the LMS for ${daysInactive} days`);
+    }
+
+    // ----- status -----
+    let risk = 'ok';
+    if (score !== null) risk = score < cfg.highRiskBelow ? 'high' : score < cfg.watchBelow ? 'watch' : 'ok';
+    if (risk === 'ok' && reasons.some((r) => r.level === 'high')) risk = 'watch'; // one serious red flag is enough
+
+    // Help-seeking is only worth mentioning when there is already a concern.
+    if (risk !== 'ok' || reasons.length) {
+      if (officeHours.state === 'none') {
+        add('watch', 'support', 'No office hours', 'Has not booked any office hours', true);
+      } else if (officeHours.state === 'missed') {
+        add('watch', 'support', 'Missed office hours', 'Missed the last office hour and has nothing booked', true);
+      }
+    }
+
+    // Serious concerns first, keep the original order inside each level.
+    const order = { high: 0, watch: 1 };
+    reasons.sort((a, b) => order[a.level] - order[b.level]);
+
+    // Main issue: the top two different kinds of problem.
+    const topics = [];
+    const shorts = [];
+    reasons
+      .filter((r) => !r.support)
+      .forEach((r) => {
+        if (shorts.length < 2 && !topics.includes(r.topic)) {
+          topics.push(r.topic);
+          shorts.push(r.short);
+        }
+      });
+
+    return {
+      student,
+      score,
+      risk,
+      reasons,
+      mainIssue: shorts.length ? shorts.join(' + ') : '',
+      assignments: { average: assignmentAvg, missing, total: mine.length, sections, weakSections, level: levels.assignments, list: mine },
+      exams: { average: examAvg, count: examList.length, list: examList, level: levels.exams },
+      live: { ...live, level: levels.live },
+      school: { ...school, level: levels.school },
+      officeHours,
+      daysInactive,
+    };
+  }
+
+  // ---------- everything ----------
+
+  // Weakest first (lowest score), students without a score last.
+  function byWeakest(list) {
+    return [...list].sort((a, b) => {
+      if (a.score === null && b.score === null) return a.student.name.localeCompare(b.student.name);
+      if (a.score === null) return 1;
+      if (b.score === null) return -1;
+      return a.score - b.score;
+    });
+  }
+
+  function analyse(data) {
+    const asOf = (data.meta && data.meta.asOf) || new Date().toISOString().slice(0, 10);
+
+    const sectionNames = [];
+    data.assignments.forEach((a) => {
+      if (!sectionNames.includes(a.section)) sectionNames.push(a.section);
+    });
+
+    const students = data.students.map((s) => analyseStudent(s, data, sectionNames, asOf));
+
+    const groupNames = [...new Set(students.map((s) => s.student.group))].sort();
+    const groups = groupNames.map((name) => {
+      const members = students.filter((s) => s.student.group === name);
+      const scores = members.map((s) => s.score).filter((s) => s !== null);
+      return {
+        name,
+        members,
+        average: avg(scores),
+        high: members.filter((s) => s.risk === 'high').length,
+        watch: members.filter((s) => s.risk === 'watch').length,
+        ok: members.filter((s) => s.risk === 'ok').length,
+      };
+    });
+
+    return { asOf, sections: sectionNames, students, groups };
+  }
+
+  window.Monitor = { analyse, byWeakest };
+})();
+
+</script>
+  <script>
+/*
+ * Mamdouh Student Monitor - screens.
+ * Dashboard, Groups, Group page, Students, Student page.
+ * Navigation uses the URL hash (#/, #/groups, #/students/S1001) so no server is needed.
+ */
+(function () {
+  const RISK_LABEL = { high: 'High risk', watch: 'Watch', ok: 'On track' };
+  const OFFICE_LABEL = { none: 'No booking', upcoming: 'Upcoming', attended: 'Attended', missed: 'Missed' };
+  const SUBMISSION_LABEL = { submitted: 'Submitted', late: 'Late', missing: 'Missing' };
+  const ATTENDANCE_LABEL = { present: 'Present', late: 'Late', absent: 'Absent' };
+
+  const $ = (selector) => document.querySelector(selector);
+  const view = $('#view');
+  const esc = (value) =>
+    String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pct = (n) => (n === null || n === undefined ? '–' : Math.round(n) + '%');
+  const fmtDate = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+  let A = null; // the analysed data
+  const ui = {
+    dashGroup: 'all',
+    stuGroup: 'all', stuStatus: 'all', stuWeak: 'all', stuSearch: '',
+    secCurrent: null, secGroup: 'all', secShow: 'weak',
+  };
+
+  // ---------- small building blocks ----------
+
+  const statusBadge = (risk) =>
+    `<span class="status risk-${risk}"><span class="dot" aria-hidden="true"></span>${RISK_LABEL[risk]}</span>`;
+
+  function scoreCell(s) {
+    if (s.score === null) return '<span class="muted">–</span>';
+    return `<span class="score">${pct(s.score)}</span>
+            <span class="meter" aria-hidden="true"><span class="fill risk-${s.risk}" style="width:${Math.round(s.score)}%"></span></span>`;
+  }
+
+  function studentTable(list, { showGroup = true } = {}) {
+    const rows = list
+      .map(
+        (s) => `
+        <tr class="risk-${s.risk}" data-href="#/students/${encodeURIComponent(s.student.id)}">
+          <th scope="row"><a class="student-link" href="#/students/${encodeURIComponent(s.student.id)}">${esc(s.student.name)}</a></th>
+          ${showGroup ? `<td>${esc(s.student.group)}</td>` : ''}
+          <td>${scoreCell(s)}</td>
+          <td>${s.mainIssue ? esc(s.mainIssue) : '<span class="muted">No issues</span>'}</td>
+          <td>${statusBadge(s.risk)}</td>
+        </tr>`
+      )
+      .join('');
+
+    return `
+      <div class="table-wrap">
+        <table class="roster">
+          <thead>
+            <tr>
+              <th scope="col">Student</th>
+              ${showGroup ? '<th scope="col">Group</th>' : ''}
+              <th scope="col">Score</th>
+              <th scope="col">Main issue</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function summaryPanel(list) {
+    const count = (risk) => list.filter((s) => s.risk === risk).length;
+    const scores = list.map((s) => s.score).filter((s) => s !== null);
+    const average = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+    return `
+      <div class="summary">
+        <div><span class="summary-value">${list.length}</span><span class="summary-label">Students</span></div>
+        <div><span class="summary-value">${pct(average)}</span><span class="summary-label">Average score</span></div>
+        <div><span class="summary-value">${count('high')}</span><span class="summary-label">${statusBadge('high')}</span></div>
+        <div><span class="summary-value">${count('watch')}</span><span class="summary-label">${statusBadge('watch')}</span></div>
+        <div><span class="summary-value">${count('ok')}</span><span class="summary-label">${statusBadge('ok')}</span></div>
+      </div>`;
+  }
+
+  const groupOptions = (selected, allLabel) =>
+    `<option value="all">${allLabel}</option>` +
+    A.groups
+      .map((g) => `<option value="${esc(g.name)}"${g.name === selected ? ' selected' : ''}>${esc(g.name)}</option>`)
+      .join('');
+
+  const pageHeader = (title, subtitle) =>
+    `<header class="page-head"><h1>${esc(title)}</h1>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}</header>`;
+
+  // ---------- Dashboard ----------
+
+  function sectionCards(list) {
+    const total = list.length;
+    return `<div class="section-cards">${A.sections
+      .map((name) => {
+        const weak = list.filter((s) => s.assignments.weakSections.includes(name)).length;
+        const width = total ? (weak / total) * 100 : 0;
+        return `
+          <a class="section-card" href="#/sections/${encodeURIComponent(name)}">
+            <span class="section-name">${esc(name)}</span>
+            <span class="section-count">${weak} weak <small>of ${total}</small></span>
+            <span class="meter" aria-hidden="true"><span class="fill lvl-high" style="width:${width}%"></span></span>
+          </a>`;
+      })
+      .join('')}</div>`;
+  }
+
+  function dashboardResults() {
+    const list = ui.dashGroup === 'all' ? A.students : A.students.filter((s) => s.student.group === ui.dashGroup);
+    const attention = window.Monitor.byWeakest(list.filter((s) => s.risk !== 'ok'));
+    return `
+      ${summaryPanel(list)}
+
+      <h2 class="block-title">Weak by section</h2>
+      <p class="hint">Pick a section to see exactly who is struggling in it.</p>
+      ${sectionCards(list)}
+
+      <h2 class="block-title">Students needing attention</h2>
+      <p class="hint">Sorted automatically, weakest students first.</p>
+      ${
+        attention.length
+          ? studentTable(attention, { showGroup: true })
+          : '<p class="empty">No students need attention right now. Everyone is at or above target.</p>'
+      }`;
+  }
+
+  function viewDashboard() {
+    view.innerHTML = `
+      <header class="page-head page-head-row">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Identify struggling students before they fall behind.</p>
+        </div>
+        <label class="field">Group
+          <select id="dash-group">${groupOptions(ui.dashGroup, 'All groups')}</select>
+        </label>
+      </header>
+      <div id="dash-results">${dashboardResults()}</div>`;
+  }
+
+  // ---------- Groups ----------
+
+  function viewGroups() {
+    const cards = A.groups
+      .map(
+        (g) => `
+        <a class="group-card" href="#/groups/${encodeURIComponent(g.name)}">
+          <span class="group-name">Group ${esc(g.name)}</span>
+          <span class="group-avg">${pct(g.average)}<small>average score</small></span>
+          <span class="group-counts">
+            <span>${plural(g.members.length, 'student')}</span>
+            ${g.high ? `<span class="status risk-high"><span class="dot" aria-hidden="true"></span>${g.high} high risk</span>` : ''}
+            ${g.watch ? `<span class="status risk-watch"><span class="dot" aria-hidden="true"></span>${g.watch} watch</span>` : ''}
+            <span class="status risk-ok"><span class="dot" aria-hidden="true"></span>${g.ok} on track</span>
+          </span>
+        </a>`
+      )
+      .join('');
+
+    view.innerHTML = `
+      ${pageHeader('Groups', 'Compare how each group is doing.')}
+      <div class="group-grid">${cards}</div>`;
+  }
+
+  function viewGroup(name) {
+    const group = A.groups.find((g) => g.name === name);
+    if (!group) return notFound('That group does not exist.');
+    view.innerHTML = `
+      <a class="back" href="#/groups">Back to groups</a>
+      ${pageHeader('Group ' + group.name, plural(group.members.length, 'student'))}
+      ${summaryPanel(group.members)}
+      ${studentTable(window.Monitor.byWeakest(group.members), { showGroup: false })}`;
+  }
+
+  // ---------- Students ----------
+
+  function studentsResults() {
+    let list = A.students;
+    if (ui.stuGroup !== 'all') list = list.filter((s) => s.student.group === ui.stuGroup);
+    if (ui.stuStatus !== 'all') list = list.filter((s) => s.risk === ui.stuStatus);
+    if (ui.stuWeak === 'any') list = list.filter((s) => s.assignments.weakSections.length > 0);
+    else if (ui.stuWeak !== 'all') list = list.filter((s) => s.assignments.weakSections.includes(ui.stuWeak));
+    if (ui.stuSearch) {
+      const q = ui.stuSearch.toLowerCase();
+      list = list.filter((s) => s.student.name.toLowerCase().includes(q) || s.student.id.toLowerCase().includes(q));
+    }
+    return list.length
+      ? studentTable(window.Monitor.byWeakest(list))
+      : '<p class="empty">No students match these filters. Change the group or status, or clear the search.</p>';
+  }
+
+  function viewStudents() {
+    const statusOptions = [['all', 'All statuses'], ['high', 'High risk'], ['watch', 'Watch'], ['ok', 'On track']]
+      .map(([value, label]) => `<option value="${value}"${value === ui.stuStatus ? ' selected' : ''}>${label}</option>`)
+      .join('');
+
+    const weakOptions =
+      [['all', 'All students'], ['any', 'Weak in any section'], ...A.sections.map((n) => [n, 'Weak in ' + n])]
+        .map(([value, label]) => `<option value="${esc(value)}"${value === ui.stuWeak ? ' selected' : ''}>${esc(label)}</option>`)
+        .join('');
+
+    view.innerHTML = `
+      ${pageHeader('Students', 'Everyone in one list, weakest first.')}
+      <div class="filters">
+        <label class="field">Group <select id="stu-group">${groupOptions(ui.stuGroup, 'All groups')}</select></label>
+        <label class="field">Status <select id="stu-status">${statusOptions}</select></label>
+        <label class="field">Show <select id="stu-weak">${weakOptions}</select></label>
+        <label class="field">Search <input id="stu-search" type="search" placeholder="Name or student ID" value="${esc(ui.stuSearch)}" autocomplete="off"></label>
+      </div>
+      <div id="stu-results">${studentsResults()}</div>`;
+  }
+
+  // ---------- Sections ----------
+
+  // "Word Homework 1" inside the Word section is shown as "Homework 1".
+  const shortName = (assignment, section) =>
+    assignment.startsWith(section + ' ') ? assignment.slice(section.length + 1) : assignment;
+
+  function sectionStatus(sec) {
+    if (sec.status === 'weak') return '<span class="status risk-high"><span class="dot" aria-hidden="true"></span>Weak</span>';
+    if (sec.status === 'okay') return '<span class="status risk-ok"><span class="dot" aria-hidden="true"></span>Okay</span>';
+    return '<span class="muted">No grades</span>';
+  }
+
+  function officePill(oh) {
+    const cls = { none: 'nodata', upcoming: 'wait', attended: 'okay', missed: 'weak' }[oh.state];
+    return `<span class="pill ${cls}">${OFFICE_LABEL[oh.state]}</span>`;
+  }
+
+  function sectionResults() {
+    const name = ui.secCurrent;
+    const list = ui.secGroup === 'all' ? A.students : A.students.filter((s) => s.student.group === ui.secGroup);
+    const rows = list.map((s) => ({ s, sec: s.assignments.sections.find((x) => x.name === name) }));
+    const weak = rows.filter((r) => r.sec.status === 'weak');
+    const graded = rows.map((r) => r.sec.average).filter((v) => v !== null);
+    const average = graded.length ? graded.reduce((a, b) => a + b, 0) / graded.length : null;
+
+    const shown = (ui.secShow === 'weak' ? weak : rows).sort(
+      (a, b) => (a.sec.average === null) - (b.sec.average === null) || a.sec.average - b.sec.average
+    );
+
+    const body = shown
+      .map(({ s, sec }) => {
+        const grades = sec.assignments
+          .map((a) =>
+            a.submission === 'missing'
+              ? `<li class="bad">${esc(shortName(a.name, name))}: Missing</li>`
+              : `<li>${esc(shortName(a.name, name))}: ${a.grade}/${a.maxGrade}${a.submission === 'late' ? ' (late)' : ''}</li>`
+          )
+          .join('');
+        const meter =
+          sec.average === null
+            ? ''
+            : `<span class="meter" aria-hidden="true"><span class="fill risk-${sec.status === 'weak' ? 'high' : 'ok'}" style="width:${Math.round(sec.average)}%"></span></span>`;
+        return `
+          <tr class="sec-${sec.status}" data-href="#/students/${encodeURIComponent(s.student.id)}">
+            <th scope="row"><a class="student-link" href="#/students/${encodeURIComponent(s.student.id)}">${esc(s.student.name)}</a></th>
+            <td>${esc(s.student.group)}</td>
+            <td><span class="score">${pct(sec.average)}</span>${meter}</td>
+            <td><ul class="grade-list">${grades}</ul></td>
+            <td>${officePill(s.officeHours)}</td>
+            <td>${sectionStatus(sec)}</td>
+          </tr>`;
+      })
+      .join('');
+
+    const table = shown.length
+      ? `<div class="table-wrap">
+           <table class="roster">
+             <thead><tr>
+               <th scope="col">Student</th><th scope="col">Group</th>
+               <th scope="col">${esc(name)} average</th><th scope="col">Assignments</th>
+               <th scope="col">Office hours</th><th scope="col">Status</th>
+             </tr></thead>
+             <tbody>${body}</tbody>
+           </table>
+         </div>`
+      : `<p class="empty">${
+          ui.secShow === 'weak'
+            ? 'Nobody is weak in ' + esc(name) + ' in this group. Switch to Everyone to see all grades.'
+            : 'No students in this group.'
+        }</p>`;
+
+    return `
+      <p class="section-summary"><strong>${weak.length} of ${rows.length}</strong> students are weak in ${esc(name)}.
+        <span class="muted">Section average: ${pct(average)}.</span></p>
+      ${table}`;
+  }
+
+  function viewSections(requested) {
+    if (!A.sections.length) return notFound('There are no sections yet.');
+    ui.secCurrent = A.sections.includes(requested) ? requested : A.sections[0];
+
+    const tabs = A.sections
+      .map(
+        (n) => `<a class="tab" href="#/sections/${encodeURIComponent(n)}"${n === ui.secCurrent ? ' aria-current="page"' : ''}>${esc(n)}</a>`
+      )
+      .join('');
+
+    view.innerHTML = `
+      ${pageHeader('Sections', 'See who is weak in each part of the course.')}
+      <nav class="tabs" aria-label="Sections">${tabs}</nav>
+      <div class="filters">
+        <label class="field">Group <select id="sec-group">${groupOptions(ui.secGroup, 'All groups')}</select></label>
+        <label class="field">Show
+          <select id="sec-show">
+            <option value="weak"${ui.secShow === 'weak' ? ' selected' : ''}>Weak students only</option>
+            <option value="all"${ui.secShow === 'all' ? ' selected' : ''}>Everyone</option>
+          </select>
+        </label>
+      </div>
+      <div id="sec-results">${sectionResults()}</div>`;
+  }
+
+  // ---------- Student page ----------
+
+  function metricCard(title, value, sub, level, width) {
+    const w = width === null || width === undefined ? 0 : Math.max(0, Math.min(100, Math.round(width)));
+    return `
+      <article class="metric">
+        <h3>${title}</h3>
+        <p class="metric-value">${value}</p>
+        <p class="metric-sub">${sub}</p>
+        <span class="meter" aria-hidden="true"><span class="fill lvl-${level}" style="width:${w}%"></span></span>
+      </article>`;
+  }
+
+  function reasonsBlock(s, first) {
+    const list = s.reasons;
+    if (s.risk !== 'ok') {
+      return `
+        <section class="panel" aria-labelledby="why-title">
+          <h2 id="why-title">Why is ${esc(first)} at risk?</h2>
+          <ul class="reasons">
+            ${list
+              .map(
+                (r) => `<li><span class="dot lvl-${r.level}" aria-hidden="true"></span>
+                        <span class="visually-hidden">${r.level === 'high' ? 'Serious concern: ' : 'Concern: '}</span>${esc(r.text)}</li>`
+              )
+              .join('')}
+          </ul>
+        </section>`;
+    }
+    if (list.length) {
+      return `
+        <section class="panel" aria-labelledby="why-title">
+          <h2 id="why-title">Worth keeping an eye on</h2>
+          <ul class="reasons">
+            ${list.map((r) => `<li><span class="dot lvl-${r.level}" aria-hidden="true"></span>${esc(r.text)}</li>`).join('')}
+          </ul>
+        </section>`;
+    }
+    return `
+      <section class="panel" aria-labelledby="why-title">
+        <h2 id="why-title">How is ${esc(first)} doing?</h2>
+        <p>No concerns. Everything is at or above target.</p>
+      </section>`;
+  }
+
+  function attendanceChips(summary) {
+    if (!summary.total) return '<p class="muted">Nothing recorded yet.</p>';
+    return `<ul class="chips">${summary.records
+      .map((r) => `<li class="chip ${r.status}">${fmtDate(r.date)}: ${ATTENDANCE_LABEL[r.status]}</li>`)
+      .join('')}</ul>`;
+  }
+
+  function sectionPill(section) {
+    if (section.status === 'weak') return `<span class="pill weak"><b>Weak</b> ${pct(section.average)}</span>`;
+    if (section.status === 'okay') return `<span class="pill okay">Okay ${pct(section.average)}</span>`;
+    return '<span class="pill nodata">No grades</span>';
+  }
+
+  function viewStudent(id) {
+    const s = A.students.find((x) => x.student.id === id);
+    if (!s) return notFound('That student does not exist.');
+    const first = s.student.name.split(' ')[0];
+    const oh = s.officeHours;
+
+    const cards = [
+      metricCard('Assignments', pct(s.assignments.average),
+        s.assignments.missing ? `${s.assignments.missing} of ${s.assignments.total} missing` : 'All submitted',
+        s.assignments.level, s.assignments.average),
+      metricCard('Exams', pct(s.exams.average),
+        s.exams.count ? plural(s.exams.count, 'exam') : 'No exams yet', s.exams.level, s.exams.average),
+      metricCard('Live attendance', pct(s.live.rate),
+        `${s.live.attended} of ${s.live.total} sessions`, s.live.level, s.live.rate),
+      metricCard('School attendance', pct(s.school.rate),
+        `${s.school.attended} of ${s.school.total} days`, s.school.level, s.school.rate),
+      metricCard('Office hours', oh.total ? `${oh.attended}/${oh.total}` : 'None',
+        oh.total ? `${oh.attended} attended, ${oh.missed} missed, ${oh.upcoming} upcoming` : 'No sessions booked',
+        'none', oh.total ? (oh.attended / oh.total) * 100 : 0),
+    ].join('');
+
+    const sectionsHtml = s.assignments.sections
+      .map(
+        (section) => `
+        <div class="sub-block">
+          <h3>${esc(section.name)} ${sectionPill(section)}</h3>
+          <table class="mini">
+            <thead><tr><th scope="col">Assignment</th><th scope="col">Due</th><th scope="col">Grade</th><th scope="col">Submission</th></tr></thead>
+            <tbody>
+              ${section.assignments
+                .map(
+                  (a) => `<tr>
+                    <td>${esc(a.name)}</td>
+                    <td>${fmtDate(a.dueDate)}</td>
+                    <td>${a.grade === null ? '–' : a.grade + ' / ' + a.maxGrade}</td>
+                    <td class="${a.submission === 'missing' ? 'bad' : ''}">${SUBMISSION_LABEL[a.submission]}</td>
+                  </tr>`
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>`
+      )
+      .join('');
+
+    const examsHtml = s.exams.list.length
+      ? `<table class="mini">
+           <thead><tr><th scope="col">Exam</th><th scope="col">Date</th><th scope="col">Score</th></tr></thead>
+           <tbody>${s.exams.list
+             .map(
+               (e) => `<tr><td>${esc(e.name)}</td><td>${fmtDate(e.date)}</td>
+                       <td>${e.score === null ? 'Absent' : e.score + ' / ' + e.maxScore}</td></tr>`
+             )
+             .join('')}</tbody>
+         </table>`
+      : '<p class="muted">No exams yet.</p>';
+
+    const officeHtml = oh.sessions.length
+      ? `<table class="mini">
+           <thead><tr><th scope="col">Date</th><th scope="col">Status</th></tr></thead>
+           <tbody>${oh.sessions.map((o) => `<tr><td>${fmtDate(o.date)}</td><td>${OFFICE_LABEL[o.status]}</td></tr>`).join('')}</tbody>
+         </table>`
+      : '<p class="muted">This student has not booked any office hours.</p>';
+
+    view.innerHTML = `
+      <a class="back" href="#/students">Back to students</a>
+      <header class="student-head">
+        <div>
+          <h1>${esc(s.student.name)}</h1>
+          <p class="muted">Group ${esc(s.student.group)}, ID ${esc(s.student.id)}</p>
+        </div>
+        <div class="overall risk-${s.risk}">
+          <span class="overall-score">${pct(s.score)}</span>
+          ${statusBadge(s.risk)}
+        </div>
+      </header>
+
+      <div class="metrics">${cards}</div>
+
+      ${reasonsBlock(s, first)}
+
+      <section class="panel" aria-labelledby="assign-title">
+        <h2 id="assign-title">Assignments</h2>
+        ${sectionsHtml}
+      </section>
+
+      <section class="panel" aria-labelledby="exam-title">
+        <h2 id="exam-title">Exams</h2>
+        ${examsHtml}
+      </section>
+
+      <section class="panel" aria-labelledby="att-title">
+        <h2 id="att-title">Attendance</h2>
+        <div class="sub-block"><h3>Live sessions</h3>${attendanceChips(s.live)}</div>
+        <div class="sub-block"><h3>School days</h3>${attendanceChips(s.school)}</div>
+      </section>
+
+      <section class="panel" aria-labelledby="oh-title">
+        <h2 id="oh-title">Office hours</h2>
+        ${officeHtml}
+      </section>`;
+  }
+
+  function notFound(message) {
+    view.innerHTML = `${pageHeader('Not found', message)}<a class="back" href="#/">Go to the dashboard</a>`;
+  }
+
+  // ---------- routing ----------
+
+  function route() {
+    if (!A) return;
+    const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
+    const page = parts[0] || 'dashboard';
+
+    document.querySelectorAll('[data-nav]').forEach((link) => {
+      const current = link.dataset.nav === (page === 'dashboard' ? 'dashboard' : page);
+      if (current) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+
+    if (page === 'groups') parts[1] ? viewGroup(parts[1]) : viewGroups();
+    else if (page === 'sections') viewSections(parts[1]);
+    else if (page === 'students') parts[1] ? viewStudent(parts[1]) : viewStudents();
+    else viewDashboard();
+
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- events ----------
+
+  view.addEventListener('change', (e) => {
+    if (e.target.id === 'dash-group') {
+      ui.dashGroup = e.target.value;
+      $('#dash-results').innerHTML = dashboardResults();
+    } else if (e.target.id === 'stu-group') {
+      ui.stuGroup = e.target.value;
+      $('#stu-results').innerHTML = studentsResults();
+    } else if (e.target.id === 'stu-weak') {
+      ui.stuWeak = e.target.value;
+      $('#stu-results').innerHTML = studentsResults();
+    } else if (e.target.id === 'sec-group') {
+      ui.secGroup = e.target.value;
+      $('#sec-results').innerHTML = sectionResults();
+    } else if (e.target.id === 'sec-show') {
+      ui.secShow = e.target.value;
+      $('#sec-results').innerHTML = sectionResults();
+    } else if (e.target.id === 'stu-status') {
+      ui.stuStatus = e.target.value;
+      $('#stu-results').innerHTML = studentsResults();
+    }
+  });
+
+  view.addEventListener('input', (e) => {
+    if (e.target.id === 'stu-search') {
+      ui.stuSearch = e.target.value.trim();
+      $('#stu-results').innerHTML = studentsResults();
+    }
+  });
+
+  // Clicking anywhere on a row opens the student (the name is also a real link for keyboards).
+  view.addEventListener('click', (e) => {
+    const row = e.target.closest('tr[data-href]');
+    if (row && !e.target.closest('a')) location.hash = row.dataset.href;
+  });
+
+  window.addEventListener('hashchange', route);
+
+  // ---------- start ----------
+
+  if (window.DATA_SOURCE_IS_SAMPLE) $('#sample-notice').hidden = false;
+
+  window
+    .loadLmsData()
+    .then((data) => {
+      A = window.Monitor.analyse(data);
+      route();
+    })
+    .catch(() => {
+      view.innerHTML = `${pageHeader('Could not load student data', 'Check js/data-source.js and reload the page.')}`;
+    });
+})();
+
+</script>
+</body>
+</html>
